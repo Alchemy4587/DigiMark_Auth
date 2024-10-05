@@ -1,15 +1,16 @@
 import { User } from "../model/user.model.js"; // Import the User model to interact with the users collection in the database
-// Import bcryptjs, a library used to hash passwords
-import bcryptjs from 'bcryptjs';
+import bcryptjs from 'bcryptjs';// Import bcryptjs, a library used to hash passwords
+import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 // Export the signup function to handle user registration
 export const signup = async (req, res) => {
-    const { email, password, name } = req.body; // Extract email, password, and name from the incoming request body
+    const { email, password, name } = req.body; 
+    // Extract email, password, and name from the incoming request body
     try {
-        if (!email || !password || name) { // Check if any required field is missing, and throw an error if so
+        if (!email || !password || !name) { // Check if any required field is missing, and throw an error if so
             throw new Error("All fields are required");
         }    
-        const userAlreadyExist = await User.findOne({ email }); // Check if a user with the provided email already exists in the database        
-        
+        // Check if a user with the provided email already exists in the database  
+        const userAlreadyExist = await User.findOne({ email });       
         if (userAlreadyExist) { // If the user already exists, return a 400 status and an error message
             return res.status(400).json({ success: false, message: "User Already Exist" });
         }
@@ -27,6 +28,17 @@ export const signup = async (req, res) => {
 
         await user.save(); // Save the new user to the database
         
+        //jwt
+        generateTokenAndSetCookie(res, user._id);
+
+        res.status(201).json({
+            success: true,
+            message: "User Created Successfully",
+            user: {
+                ...user._doc,
+                password: undefined
+            }
+        });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message }); // If an error occurs, return a 400 status with the error message
     }
