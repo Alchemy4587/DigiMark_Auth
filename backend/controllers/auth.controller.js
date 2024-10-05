@@ -1,6 +1,7 @@
 import { User } from "../model/user.model.js"; // Import the User model to interact with the users collection in the database
 import bcryptjs from 'bcryptjs';// Import bcryptjs, a library used to hash passwords
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
+import { sendVerificationEmail } from "../mailtrap/email.js";
 // Export the signup function to handle user registration
 export const signup = async (req, res) => {
     const { email, password, name } = req.body; 
@@ -16,6 +17,7 @@ export const signup = async (req, res) => {
         }
 
         const hashedPassword = await bcryptjs.hash(password, 10);// Hash the password using bcryptjs with a salt round of 10 for security
+        
         const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();// Generate a 6-digit verification token for account verification
 
         const user = new User({ // Create a new User instance with the email, hashed password, name, and verification token
@@ -30,6 +32,8 @@ export const signup = async (req, res) => {
         
         //jwt
         generateTokenAndSetCookie(res, user._id);
+
+        await sendVerificationEmail(user.email,verificationToken);
 
         res.status(201).json({
             success: true,
