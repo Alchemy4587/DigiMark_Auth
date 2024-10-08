@@ -6,7 +6,8 @@ import {
     logout, 
     resetPassword, 
     signup, 
-    verifyEmail } from '../controllers/auth.controller.js'; // Importing the authentication-related controller functions (signup, login, logout) from the auth.controller.js file
+    verifyEmail 
+} from '../controllers/auth.controller.js'; // Importing the authentication-related controller functions (signup, login, logout) from the auth.controller.js file
 import { verifyToken } from '../middleware/verifyToken.js';
 // Create an express router instance to define route handlers
 const router = express.Router();
